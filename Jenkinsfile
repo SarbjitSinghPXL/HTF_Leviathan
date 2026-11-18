@@ -1,27 +1,7 @@
 
 pipeline {
     agent {
-        kubernetes {
-            yaml '''
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-    - name: git
-      image: alpine/git:2.47.2
-      command:
-        - cat
-      tty: true
-      resources:
-        requests:
-          cpu: 50m
-          memory: 64Mi
-        limits:
-          cpu: 250m
-          memory: 256Mi
-'''
-            defaultContainer 'git'
-        }
+        label 'windows && docker'
     }
 
     options {
@@ -30,13 +10,14 @@ spec:
     }
 
     stages {
-        stage('Controleer repository') {
+        stage('Controleer Docker Desktop') {
             steps {
-                sh '''
-                    echo "HTF Leviathan - Jenkins test"
-                    git --version
-                    git -c safe.directory="$PWD" log -1 --oneline
-                    echo "Repository succesvol opgehaald!"
+                powershell '''
+                    Write-Host "HTF Leviathan - Windows Jenkins-agent"
+                    docker version
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Docker Desktop is niet bereikbaar"
+                    }
                 '''
             }
         }
