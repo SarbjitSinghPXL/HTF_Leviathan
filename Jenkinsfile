@@ -32,5 +32,27 @@ pipeline {
                 '''
             }
         }
+        stage('Build API image') {
+            steps {
+                powershell '''
+                    docker build `
+                    --platform linux/amd64 `
+                    -f api/Dockerfile `
+                    -t htf-leviathan-api:test `
+                    ./api
+
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "API Docker build mislukt"
+                    }
+
+                    docker image inspect htf-leviathan-api:test `
+                    --format "{{.Os}}/{{.Architecture}}"
+
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Docker image inspect mislukt"
+                    }
+                '''
+            }
+        }
     }
 }
