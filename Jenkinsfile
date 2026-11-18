@@ -35,7 +35,7 @@ spec:
                 sh '''
                     echo "HTF Leviathan - Jenkins test"
                     git --version
-                    git log -1 --oneline
+                    git -c safe.directory="$PWD" log -1 --oneline
                     echo "Repository succesvol opgehaald!"
                 '''
             }
