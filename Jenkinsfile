@@ -6,17 +6,28 @@ pipeline {
 
     options {
         disableConcurrentBuilds()
-        timeout(time: 10, unit: 'MINUTES')
+        timeout(time: 20, unit: 'MINUTES')
     }
 
     stages {
-        stage('Controleer Docker Desktop') {
+        stage('Build frontend image') {
             steps {
                 powershell '''
-                    Write-Host "HTF Leviathan - Windows Jenkins-agent"
-                    docker version
+                    docker build `
+                      --platform linux/amd64 `
+                      -f frontend/Dockerfile `
+                      -t htf-leviathan-frontend:test `
+                      ./frontend
+
                     if ($LASTEXITCODE -ne 0) {
-                        throw "Docker Desktop is niet bereikbaar"
+                        throw "Frontend Docker build mislukt"
+                    }
+
+                    docker image inspect htf-leviathan-frontend:test `
+                      --format "{{.Os}}/{{.Architecture}}"
+
+                    if ($LASTEXITCODE -ne 0) {
+                        throw "Docker image inspect mislukt"
                     }
                 '''
             }
