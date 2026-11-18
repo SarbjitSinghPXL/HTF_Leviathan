@@ -1,6 +1,12 @@
 <script setup>
 import Globe from "globe.gl";
 import { ref, computed, watch, onMounted, nextTick, onUnmounted } from "vue"; // ✅ Added onUnmounted
+// Globe textures are bundled from the locked three-globe package (served by this app,
+// fingerprinted for caching) instead of being fetched at runtime from unpkg.com.
+import earthBlueMarbleUrl from "@globe-textures/earth-blue-marble.jpg";
+import earthNightUrl from "@globe-textures/earth-night.jpg";
+import earthTopologyUrl from "@globe-textures/earth-topology.png";
+import nightSkyUrl from "@globe-textures/night-sky.png";
 
 // ────────────────────────────────────────────────────────────────
 // State & Refs
@@ -222,10 +228,10 @@ watch(isDayMode, (isDay) => {
   myGlobe.value
     .globeImageUrl(
       isDay
-        ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-        : "//unpkg.com/three-globe/example/img/earth-night.jpg"
+        ? earthBlueMarbleUrl
+        : earthNightUrl
     )
-    .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
+    .bumpImageUrl(earthTopologyUrl)
     .showAtmosphere(true)
     .atmosphereColor(isDay ? '#87CEEB' : '#3a228a')
     .atmosphereAltitude(isDay ? 0.15 : 0.2);
@@ -490,11 +496,11 @@ onMounted(async () => {
     myGlobe.value = Globe()(globeDiv.value)
       .globeImageUrl(
         isDayMode.value
-          ? "//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-          : "//unpkg.com/three-globe/example/img/earth-night.jpg"
+          ? earthBlueMarbleUrl
+          : earthNightUrl
       )
-      .bumpImageUrl("//unpkg.com/three-globe/example/img/earth-topology.png")
-      .backgroundImageUrl("//unpkg.com/three-globe/example/img/night-sky.png")
+      .bumpImageUrl(earthTopologyUrl)
+      .backgroundImageUrl(nightSkyUrl)
       .showAtmosphere(true)
       .atmosphereColor(isDayMode.value ? '#87CEEB' : '#3a228a')
       .atmosphereAltitude(isDayMode.value ? 0.15 : 0.2);
