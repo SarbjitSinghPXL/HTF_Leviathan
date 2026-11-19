@@ -9,7 +9,7 @@ metadata:
 data:
   # Public hostname. The placeholder uses the reserved .invalid TLD, so certificate
   # issuance cannot succeed by accident before a real hostname is chosen.
-  hostname: htf-leviathan.change-me.invalid
+  hostname: htf-leviathan.duckdns.org
   # Start with letsencrypt-staging; switch to letsencrypt-production once DNS resolves to
   # 178.105.83.76 and a staging certificate was issued successfully (docs/deployment.md).
-  clusterIssuer: letsencrypt-staging
+  clusterIssuer: letsencrypt-production
