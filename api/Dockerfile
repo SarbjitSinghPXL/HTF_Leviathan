@@ -22,9 +22,11 @@ ENV NODE_ENV=production \
 COPY --from=deps /app/node_modules ./node_modules
 COPY app/package.json app/tsconfig.json app/health-check.js ./
 # Versioned SQL migrations, applied only by the explicit migrate job.
-COPY app/drizzle ./drizzle
-COPY app/src ./src
-COPY entrypoint.sh ./entrypoint.sh
+COPY --chown=bun:bun app/drizzle ./drizzle
+COPY --chown=bun:bun app/src ./src
+COPY --chown=bun:bun entrypoint.sh ./entrypoint.sh
+
+RUN chmod -R u+rwX /app/src /app/drizzle
 
 # Unprivileged user provided by the oven/bun image (uid/gid 1000).
 USER bun
