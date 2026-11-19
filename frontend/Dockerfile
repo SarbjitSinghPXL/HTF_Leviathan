@@ -20,6 +20,8 @@ RUN bun run build
 # Runs as uid 101 and listens on 8080 (no root, no privileged port).
 FROM nginxinc/nginx-unprivileged:${NGINX_VERSION}-alpine AS runtime
 
+USER root
+
 COPY nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY nginx/security-headers.conf /etc/nginx/snippets/security-headers.conf
 COPY --from=build /app/dist /usr/share/nginx/html
@@ -27,6 +29,8 @@ COPY --from=build /app/dist /usr/share/nginx/html
 RUN chmod 644 /etc/nginx/conf.d/default.conf \
     /etc/nginx/snippets/security-headers.conf \
     && chmod -R a+rX /usr/share/nginx/html
+
+USER 101
 
 EXPOSE 8080
 
