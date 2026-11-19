@@ -45,5 +45,31 @@ pipeline {
                 '''
             }
         }
+        stage('Push images to private registry') {
+            steps {
+                sh '''
+                    set -eu
+
+                    REGISTRY="10.43.189.172:5000"
+                    AUTHFILE="/home/jenkins-builder/.config/containers/auth.json"
+
+                    podman --cgroup-manager=cgroupfs tag \
+                    localhost/htf-leviathan-frontend:test \
+                    "$REGISTRY/htf-leviathan-frontend:test"
+
+                    podman --cgroup-manager=cgroupfs tag \
+                    localhost/htf-leviathan-api:test \
+                    "$REGISTRY/htf-leviathan-api:test"
+
+                    podman --cgroup-manager=cgroupfs push \
+                    --authfile "$AUTHFILE" \
+                    "$REGISTRY/htf-leviathan-frontend:test"
+
+                    podman --cgroup-manager=cgroupfs push \
+                    --authfile "$AUTHFILE" \
+                    "$REGISTRY/htf-leviathan-api:test"
+                '''
+            }
+        }
     }
 }
