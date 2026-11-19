@@ -54,5 +54,39 @@ pipeline {
                 '''
             }
         }
+        stage('Controleer GHCR login') {
+            steps {
+                withCredentials([
+                    usernamePassword(
+                        credentialsId: 'github-ghcr',
+                        usernameVariable: 'GHCR_USER',
+                        passwordVariable: 'GHCR_TOKEN'
+                    )
+                ]) {
+                    powershell '''
+                        $ErrorActionPreference = "Stop"
+
+                        # Tijdelijke Docker-loginconfiguratie
+                        $env:DOCKER_CONFIG = Join-Path $env:TEMP ("jenkins-ghcr-" + $env:BUILD_NUMBER)
+                        New-Item -ItemType Directory -Force -Path $env:DOCKER_CONFIG | Out-Null
+
+                        try {
+                            $env:GHCR_TOKEN | docker login ghcr.io `
+                                --username $env:GHCR_USER `
+                                --password-stdin
+
+                            if ($LASTEXITCODE -ne 0) {
+                                throw "GHCR login mislukt"
+                            }
+
+                            Write-Host "GHCR login geslaagd!"
+                        }
+                        finally {
+                            Remove-Item $env:DOCKER_CONFIG -Recurse -Force -ErrorAction SilentlyContinue
+                        }
+                    '''
+                }
+            }
+        }
     }
 }
