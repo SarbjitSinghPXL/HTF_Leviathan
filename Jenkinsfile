@@ -66,17 +66,30 @@ pipeline {
                     powershell '''
                         $ErrorActionPreference = "Stop"
 
-                        # Tijdelijke Docker-loginconfiguratie
                         $env:DOCKER_CONFIG = Join-Path $env:TEMP ("jenkins-ghcr-" + $env:BUILD_NUMBER)
                         New-Item -ItemType Directory -Force -Path $env:DOCKER_CONFIG | Out-Null
 
                         try {
-                            $env:GHCR_TOKEN | docker login ghcr.io `
-                                --username $env:GHCR_USER `
-                                --password-stdin
+                            $process = New-Object System.Diagnostics.Process
+                            $process.StartInfo.FileName = "docker.exe"
+                            $process.StartInfo.Arguments = "login ghcr.io --username $env:GHCR_USER --password-stdin"
+                            $process.StartInfo.UseShellExecute = $false
+                            $process.StartInfo.RedirectStandardInput = $true
+                            $process.StartInfo.RedirectStandardOutput = $true
+                            $process.StartInfo.RedirectStandardError = $true
 
-                            if ($LASTEXITCODE -ne 0) {
-                                throw "GHCR login mislukt"
+                            $process.StartInfo.StandardInputEncoding = New-Object System.Text.UTF8Encoding($false)
+
+                            [void]$process.Start()
+                            $process.StandardInput.WriteLine($env:GHCR_TOKEN)
+                            $process.StandardInput.Close()
+
+                            $output = $process.StandardOutput.ReadToEnd()
+                            $errors = $process.StandardError.ReadToEnd()
+                            $process.WaitForExit()
+
+                            if ($process.ExitCode -ne 0) {
+                                throw "GHCR login mislukt (exitcode $($process.ExitCode))"
                             }
 
                             Write-Host "GHCR login geslaagd!"
